@@ -1,9 +1,16 @@
-"use client"
+"use client";
 
-import { ArrowRight, Calendar, ShoppingBag, Star, Users, Zap } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  ArrowRight,
+  Calendar,
+  ShoppingBag,
+  Star,
+  Users,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -24,8 +31,9 @@ export default function HomePage() {
                   Game
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Professional coaching, premium equipment, and a community of passionate players. Elevate your
-                  badminton skills at Baddy Sportz.
+                  Professional coaching, premium equipment, and a community of
+                  passionate players. Elevate your badminton skills at Baddy
+                  Sportz.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -53,7 +61,7 @@ export default function HomePage() {
             <div className="relative animate-fade-in-right">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-3xl blur-3xl opacity-20 animate-pulse" />
               <img
-                src="/placeholder.svg?height=600&width=500"
+                src="/images/IMG_8916.jpg?height=1000&width=1000"
                 alt="Professional badminton player"
                 className="relative z-10 w-full h-auto rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
               />
@@ -66,9 +74,12 @@ export default function HomePage() {
       <section className="py-16 lg:py-24 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Why Choose Baddy Sportz?</h2>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
+              Why Choose Baddy Sportz?
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We're committed to helping you achieve your badminton goals with expert coaching and premium equipment.
+              We're committed to helping you achieve your badminton goals with
+              expert coaching and premium equipment.
             </p>
           </div>
 
@@ -77,19 +88,22 @@ export default function HomePage() {
               {
                 icon: Users,
                 title: "Expert Coaching",
-                description: "Learn from certified professionals with years of competitive experience.",
+                description:
+                  "Learn from certified professionals with years of competitive experience.",
                 color: "from-emerald-500 to-emerald-600",
               },
               {
                 icon: Zap,
                 title: "Premium Equipment",
-                description: "Access to the latest badminton gear from top brands worldwide.",
+                description:
+                  "Access to the latest badminton gear from top brands worldwide.",
                 color: "from-blue-500 to-blue-600",
               },
               {
                 icon: Star,
                 title: "Proven Results",
-                description: "Join hundreds of satisfied players who've improved their game with us.",
+                description:
+                  "Join hundreds of satisfied players who've improved their game with us.",
                 color: "from-purple-500 to-purple-600",
               },
             ].map((feature, index) => (
@@ -103,8 +117,12 @@ export default function HomePage() {
                   >
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -122,8 +140,14 @@ export default function HomePage() {
               { number: "5", label: "Years Experience" },
               { number: "1000+", label: "Products Available" },
             ].map((stat, index) => (
-              <div key={index} className="space-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="text-4xl lg:text-5xl font-bold">{stat.number}</div>
+              <div
+                key={index}
+                className="space-y-2 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="text-4xl lg:text-5xl font-bold">
+                  {stat.number}
+                </div>
                 <div className="text-emerald-100 text-lg">{stat.label}</div>
               </div>
             ))}
@@ -134,9 +158,12 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Ready to Start Your Badminton Journey?</h2>
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
+            Ready to Start Your Badminton Journey?
+          </h2>
           <p className="text-xl text-gray-600">
-            Book your first lesson today and discover what makes Baddy Sportz the premier badminton destination.
+            Book your first lesson today and discover what makes Baddy Sportz
+            the premier badminton destination.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/lessons">
@@ -161,5 +188,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
