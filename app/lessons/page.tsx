@@ -31,7 +31,7 @@ export default function LessonsPage() {
         "Flexible scheduling",
       ],
       duration: "60 minutes",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/images/IMG_8915.jpg?height=300&width=400",
     },
     {
       id: "group",
@@ -45,7 +45,7 @@ export default function LessonsPage() {
         "Cost effective",
       ],
       duration: "90 minutes",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/images/IMG_8915.jpg?height=300&width=400",
     },
     {
       id: "intensive",
@@ -59,7 +59,7 @@ export default function LessonsPage() {
         "Performance analysis",
       ],
       duration: "2 hours",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/images/IMG_8915.jpg?height=300&width=400",
     },
   ];
 
@@ -69,7 +69,21 @@ export default function LessonsPage() {
       specialty: "Children only",
       experience: "69 years",
       rating: 69,
-      image: "/placeholder.svg?height=200&width=200",
+      image: "/images/IMG_6922.jpg?height=200&width=200",
+    },
+    {
+      name: "Bjorn the Beast",
+      specialty: "Children only",
+      experience: "69 years",
+      rating: 69,
+      image: "/images/82723.jpg?height=200&width=200",
+    },
+    {
+      name: "Eden Au",
+      specialty: "West Lake girls ONLY",
+      experience: "69 years",
+      rating: 69,
+      image: "/images/2.png?height=200&width=200",
     },
   ];
 

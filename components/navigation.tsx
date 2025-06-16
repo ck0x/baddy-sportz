@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu, X, Zap } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -17,7 +17,7 @@ export function Navigation() {
     { name: "Products", href: "/products" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-  ]
+  ];
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200/50">
@@ -28,7 +28,7 @@ export function Navigation() {
             <div className="w-8 h-8 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Baddy Sportz</span>
+            <span className="text-xl font-bold text-gray-900">BaddySportz</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -39,14 +39,14 @@ export function Navigation() {
                 href={item.href}
                 className={cn(
                   "text-gray-600 hover:text-emerald-600 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group",
-                  pathname === item.href && "text-emerald-600",
+                  pathname === item.href && "text-emerald-600"
                 )}
               >
                 {item.name}
                 <span
                   className={cn(
                     "absolute bottom-0 left-0 w-full h-0.5 bg-emerald-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200",
-                    pathname === item.href && "scale-x-100",
+                    pathname === item.href && "scale-x-100"
                   )}
                 />
               </Link>
@@ -66,7 +66,11 @@ export function Navigation() {
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-600 hover:text-emerald-600"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -81,7 +85,7 @@ export function Navigation() {
                   href={item.href}
                   className={cn(
                     "block px-3 py-2 text-base font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors duration-200",
-                    pathname === item.href && "text-emerald-600 bg-emerald-50",
+                    pathname === item.href && "text-emerald-600 bg-emerald-50"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
@@ -100,5 +104,5 @@ export function Navigation() {
         )}
       </div>
     </nav>
-  )
+  );
 }
