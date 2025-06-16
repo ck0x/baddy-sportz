@@ -66,7 +66,7 @@ export default function LessonsPage() {
   const coaches = [
     {
       name: "Uncle Jeff",
-      specialty: "Very Proffessional",
+      specialty: "Very Professional",
       experience: "69 years",
       rating: 69,
       image: "/images/IMG_6922.jpg?height=200&width=200",
