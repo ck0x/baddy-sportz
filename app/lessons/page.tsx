@@ -66,21 +66,21 @@ export default function LessonsPage() {
   const coaches = [
     {
       name: "Uncle Jeff",
-      specialty: "Children only",
+      specialty: "Very Proffessional",
       experience: "69 years",
       rating: 69,
       image: "/images/IMG_6922.jpg?height=200&width=200",
     },
     {
       name: "Bjorn the Beast",
-      specialty: "Children only",
+      specialty: "The Beast",
       experience: "69 years",
       rating: 69,
       image: "/images/82723.jpg?height=200&width=200",
     },
     {
       name: "Eden Au",
-      specialty: "West Lake girls ONLY",
+      specialty: "WestLake girls ONLY",
       experience: "69 years",
       rating: 69,
       image: "/images/2.png?height=200&width=200",
