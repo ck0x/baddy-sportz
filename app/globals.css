@@ -68,6 +68,15 @@
   }
 }
 
+/* Kiosk mode for fullscreen iPad display */
+.kiosk nav,
+.kiosk footer {
+  display: none !important;
+}
+.kiosk main {
+  padding-top: 0 !important;
+}
+
 @layer utilities {
   .animate-fade-in-up {
     animation: fadeInUp 0.6s ease-out forwards;

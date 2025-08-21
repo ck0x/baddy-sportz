@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,8 @@ import {
   Zap,
   Settings,
   FileText,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 
 interface FormData {
@@ -50,6 +52,46 @@ export default function CustomerIntakeForm() {
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isKiosk, setIsKiosk] = useState(false);
+
+  // Apply/remove body class for kiosk mode
+  useEffect(() => {
+    if (isKiosk) {
+      document.body.classList.add("kiosk");
+    } else {
+      document.body.classList.remove("kiosk");
+    }
+  }, [isKiosk]);
+
+  const enterKiosk = async () => {
+    setIsKiosk(true);
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen?.();
+      }
+    } catch {}
+  };
+
+  const exitKiosk = async () => {
+    setIsKiosk(false);
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen?.();
+      }
+    } catch {}
+  };
+
+  // Cleanup on unmount so kiosk styles don't persist across navigation
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove("kiosk");
+      try {
+        if (document.fullscreenElement) {
+          document.exitFullscreen?.();
+        }
+      } catch {}
+    };
+  }, []);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -84,6 +126,20 @@ export default function CustomerIntakeForm() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-6">
+        {/* Kiosk toggle button */}
+        {isKiosk ? (
+          <div className="fixed top-4 right-4 z-[60]">
+            <Button variant="secondary" onClick={exitKiosk} className="shadow">
+              <Minimize2 className="h-4 w-4 mr-2" /> Exit Kiosk
+            </Button>
+          </div>
+        ) : (
+          <div className="fixed top-20 right-4 z-[60]">
+            <Button variant="outline" onClick={enterKiosk} className="shadow">
+              <Maximize2 className="h-4 w-4 mr-2" /> Kiosk Mode
+            </Button>
+          </div>
+        )}
         <Card className="w-full max-w-md text-center shadow-xl border-0 bg-white">
           <CardContent className="pt-12 pb-8">
             <div className="flex justify-center mb-6">
@@ -113,6 +169,20 @@ export default function CustomerIntakeForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+      {/* Kiosk toggle button */}
+      {isKiosk ? (
+        <div className="fixed top-4 right-4 z-[60]">
+          <Button variant="secondary" onClick={exitKiosk} className="shadow">
+            <Minimize2 className="h-4 w-4 mr-2" /> Exit Kiosk
+          </Button>
+        </div>
+      ) : (
+        <div className="fixed top-20 right-4 z-[60]">
+          <Button variant="outline" onClick={enterKiosk} className="shadow">
+            <Maximize2 className="h-4 w-4 mr-2" /> Kiosk Mode
+          </Button>
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
