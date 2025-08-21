@@ -390,18 +390,9 @@ export default function CustomerIntakeForm() {
                   }
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
-                  <div
+                  <Label
+                    htmlFor="standard"
                     className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
-                    onClick={() => handleInputChange("serviceType", "standard")}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleInputChange("serviceType", "standard");
-                      }
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-pressed={formData.serviceType === "standard"}
                   >
                     <RadioGroupItem
                       value="standard"
@@ -416,20 +407,11 @@ export default function CustomerIntakeForm() {
                         Regular stringing service
                       </p>
                     </div>
-                  </div>
+                  </Label>
 
-                  <div
+                  <Label
+                    htmlFor="premium"
                     className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
-                    onClick={() => handleInputChange("serviceType", "premium")}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleInputChange("serviceType", "premium");
-                      }
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-pressed={formData.serviceType === "premium"}
                   >
                     <RadioGroupItem
                       value="premium"
@@ -444,7 +426,7 @@ export default function CustomerIntakeForm() {
                         Express + quality guarantee
                       </p>
                     </div>
-                  </div>
+                  </Label>
                 </RadioGroup>
               </div>
 
