@@ -17,6 +17,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   CheckCircle,
   User,
   Phone,
@@ -24,8 +29,6 @@ import {
   Zap,
   Settings,
   FileText,
-  Maximize2,
-  Minimize2,
 } from "lucide-react";
 
 interface FormData {
@@ -40,6 +43,7 @@ interface FormData {
 }
 
 export default function CustomerIntakeForm() {
+  type Orientation = "landscape" | "portrait";
   const [formData, setFormData] = useState<FormData>({
     customerName: "",
     contactNumber: "",
@@ -52,39 +56,50 @@ export default function CustomerIntakeForm() {
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isKiosk, setIsKiosk] = useState(false);
+  const [kiosk, setKiosk] = useState<boolean>(false);
+  const [orientation, setOrientation] = useState<Orientation>("landscape");
 
-  // Apply/remove body class for kiosk mode
+  // Apply classes and fullscreen based on kiosk + orientation selectors
   useEffect(() => {
-    if (isKiosk) {
-      document.body.classList.add("kiosk");
-    } else {
-      document.body.classList.remove("kiosk");
+    const body = document.body;
+    body.classList.remove("kiosk", "ipad-landscape", "ipad-portrait");
+
+    const enableFullscreen = async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen?.();
+        }
+      } catch {}
+    };
+
+    const disableFullscreen = async () => {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen?.();
+        }
+      } catch {}
+    };
+
+    if (!kiosk) {
+      disableFullscreen();
+      return;
     }
-  }, [isKiosk]);
 
-  const enterKiosk = async () => {
-    setIsKiosk(true);
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen?.();
-      }
-    } catch {}
-  };
-
-  const exitKiosk = async () => {
-    setIsKiosk(false);
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen?.();
-      }
-    } catch {}
-  };
+    body.classList.add("kiosk");
+    body.classList.add(
+      orientation === "landscape" ? "ipad-landscape" : "ipad-portrait"
+    );
+    enableFullscreen();
+  }, [kiosk, orientation]);
 
   // Cleanup on unmount so kiosk styles don't persist across navigation
   useEffect(() => {
     return () => {
-      document.body.classList.remove("kiosk");
+      document.body.classList.remove(
+        "kiosk",
+        "ipad-landscape",
+        "ipad-portrait"
+      );
       try {
         if (document.fullscreenElement) {
           document.exitFullscreen?.();
@@ -99,13 +114,8 @@ export default function CustomerIntakeForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Here you would typically send the data to your backend
     console.log("Form submitted:", formData);
-
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     setIsSubmitted(true);
   };
 
@@ -125,65 +135,147 @@ export default function CustomerIntakeForm() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-6">
-        {/* Kiosk toggle button */}
-        {isKiosk ? (
-          <div className="fixed top-4 right-4 z-[60]">
-            <Button variant="secondary" onClick={exitKiosk} className="shadow">
-              <Minimize2 className="h-4 w-4 mr-2" /> Exit Kiosk
-            </Button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-6">
+        <div className="max-w-4xl mx-auto relative">
+          <div className="absolute top-2 -right-12 z-10">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full shadow-sm"
+                  aria-label="Screen Options"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72" side="left" align="start">
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-xs font-medium text-slate-600 mb-1">
+                      Kiosk Mode
+                    </div>
+                    <Select
+                      value={kiosk ? "on" : "off"}
+                      onValueChange={(v) => setKiosk(v === "on")}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Off" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="off">Off</SelectItem>
+                        <SelectItem value="on">On</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-slate-600 mb-1">
+                      Orientation
+                    </div>
+                    <Select
+                      value={orientation}
+                      onValueChange={(v: Orientation) => setOrientation(v)}
+                    >
+                      <SelectTrigger className="h-9" disabled={!kiosk}>
+                        <SelectValue placeholder="Horizontal" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="landscape">Horizontal</SelectItem>
+                        <SelectItem value="portrait">Vertical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-        ) : (
-          <div className="fixed top-20 right-4 z-[60]">
-            <Button variant="outline" onClick={enterKiosk} className="shadow">
-              <Maximize2 className="h-4 w-4 mr-2" /> Kiosk Mode
-            </Button>
+
+          <div className="w-full flex items-center justify-center">
+            <Card className="w-full max-w-md text-center shadow-xl border-0 bg-white">
+              <CardContent className="pt-12 pb-8">
+                <div className="flex justify-center mb-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
+                    <CheckCircle className="h-20 w-20 text-blue-600 relative z-10" />
+                  </div>
+                </div>
+                <h2 className="text-3xl font-bold text-slate-800 mb-3">
+                  Thank You!
+                </h2>
+                <p className="text-slate-600 mb-8 text-lg leading-relaxed">
+                  Your order has been submitted successfully. We'll take great
+                  care of your racket!
+                </p>
+                <Button
+                  onClick={resetForm}
+                  className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-lg text-white"
+                >
+                  Submit Another Order
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        )}
-        <Card className="w-full max-w-md text-center shadow-xl border-0 bg-white">
-          <CardContent className="pt-12 pb-8">
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
-                <CheckCircle className="h-20 w-20 text-blue-600 relative z-10" />
-              </div>
-            </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-3">
-              Thank You!
-            </h2>
-            <p className="text-slate-600 mb-8 text-lg leading-relaxed">
-              Your order has been submitted successfully. We'll take great care
-              of your racket!
-            </p>
-            <Button
-              onClick={resetForm}
-              className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-lg text-white"
-            >
-              Submit Another Order
-            </Button>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
-      {/* Kiosk toggle button */}
-      {isKiosk ? (
-        <div className="fixed top-4 right-4 z-[60]">
-          <Button variant="secondary" onClick={exitKiosk} className="shadow">
-            <Minimize2 className="h-4 w-4 mr-2" /> Exit Kiosk
-          </Button>
+      <div className="max-w-4xl mx-auto relative">
+        <div className="absolute top-2 -right-12 z-10">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full shadow-sm"
+                aria-label="Screen Options"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72" side="left" align="start">
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs font-medium text-slate-600 mb-1">
+                    Kiosk Mode
+                  </div>
+                  <Select
+                    value={kiosk ? "on" : "off"}
+                    onValueChange={(v) => setKiosk(v === "on")}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Off" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="off">Off</SelectItem>
+                      <SelectItem value="on">On</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-slate-600 mb-1">
+                    Orientation
+                  </div>
+                  <Select
+                    value={orientation}
+                    onValueChange={(v: Orientation) => setOrientation(v)}
+                  >
+                    <SelectTrigger className="h-9" disabled={!kiosk}>
+                      <SelectValue placeholder="Horizontal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="landscape">Horizontal</SelectItem>
+                      <SelectItem value="portrait">Vertical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-      ) : (
-        <div className="fixed top-20 right-4 z-[60]">
-          <Button variant="outline" onClick={enterKiosk} className="shadow">
-            <Maximize2 className="h-4 w-4 mr-2" /> Kiosk Mode
-          </Button>
-        </div>
-      )}
-      <div className="max-w-4xl mx-auto">
+
         {/* Header */}
         <div className="text-center mb-10">
           <div className="bg-slate-800 text-white p-8 rounded-2xl mb-8 shadow-xl">
