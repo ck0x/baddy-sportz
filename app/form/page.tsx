@@ -92,7 +92,9 @@ export default function CustomerIntakeForm() {
                 <CheckCircle className="h-20 w-20 text-blue-600 relative z-10" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-3">Thank You!</h2>
+            <h2 className="text-3xl font-bold text-slate-800 mb-3">
+              Thank You!
+            </h2>
             <p className="text-slate-600 mb-8 text-lg leading-relaxed">
               Your order has been submitted successfully. We'll take great care
               of your racket!
@@ -318,38 +320,56 @@ export default function CustomerIntakeForm() {
                   }
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
-                  <div className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer">
+                  <div
+                    className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
+                    onClick={() => handleInputChange("serviceType", "standard")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleInputChange("serviceType", "standard");
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-pressed={formData.serviceType === "standard"}
+                  >
                     <RadioGroupItem
                       value="standard"
                       id="standard"
                       className="w-5 h-5"
                     />
                     <div className="flex-1">
-                      <Label
-                        htmlFor="standard"
-                        className="text-lg font-semibold cursor-pointer block text-slate-800"
-                      >
+                      <div className="text-lg font-semibold block text-slate-800">
                         Standard Service
-                      </Label>
+                      </div>
                       <p className="text-slate-600 mt-1">
                         Regular stringing service
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer">
+                  <div
+                    className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
+                    onClick={() => handleInputChange("serviceType", "premium")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleInputChange("serviceType", "premium");
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-pressed={formData.serviceType === "premium"}
+                  >
                     <RadioGroupItem
                       value="premium"
                       id="premium"
                       className="w-5 h-5"
                     />
                     <div className="flex-1">
-                      <Label
-                        htmlFor="premium"
-                        className="text-lg font-semibold cursor-pointer block text-slate-800"
-                      >
+                      <div className="text-lg font-semibold block text-slate-800">
                         Premium Service
-                      </Label>
+                      </div>
                       <p className="text-slate-600 mt-1">
                         Express + quality guarantee
                       </p>
