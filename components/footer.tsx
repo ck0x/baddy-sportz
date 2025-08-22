@@ -53,13 +53,6 @@ export function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Data</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Orders are stored locally in your browser (localStorage). Add a
-              backend later to sync across devices.
-            </p>
-          </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
