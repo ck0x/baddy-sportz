@@ -79,7 +79,7 @@ export default function HomePage() {
                 icon: Zap,
                 title: "Zero Setup",
                 description:
-                  "Data stored locally first. Plug in a backend later without changing the UI flow.",
+                  "This service is offered as a web application, meaning no installation or manual labour required",
                 color: "from-blue-500 to-blue-600",
               },
               {
@@ -116,11 +116,9 @@ export default function HomePage() {
       {/* Info Strip */}
       <section className="py-16 bg-gradient-to-r from-emerald-600 to-blue-600">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-6">
-          <h2 className="text-3xl font-bold">Designed for Small Pro Shops</h2>
+          <h2 className="text-3xl font-bold">Designed for any Pro Shop</h2>
           <p className="text-emerald-100 text-lg max-w-3xl mx-auto">
-            Start with pure client-side storage. When you're ready, add an API
-            route or external DB (Supabase, Firebase, Postgres) to sync
-            orders—without redesigning the UI.
+            Simply open the website on your device, and it's ready to go!
           </p>
         </div>
       </section>
