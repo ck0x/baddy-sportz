@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, useDeferredValue } from "react";
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useDeferredValue,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -171,23 +177,38 @@ export default function OrdersPage() {
     } catch {}
   };
 
-  const bulkAdvance = () => {
-    persist(
-      orders.map((o) => {
-        if (!selectedIds.has(o.id)) return o;
-        const idx = STATUS_SEQUENCE.indexOf(o.status);
-        if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return o;
-        return { ...o, status: STATUS_SEQUENCE[idx + 1] };
-      })
-    );
+  const bulkAdvance = async () => {
+    const changed: { id: string; status: OrderStatus }[] = [];
+    const nextOrders = orders.map((o) => {
+      if (!selectedIds.has(o.id)) return o;
+      const idx = STATUS_SEQUENCE.indexOf(o.status);
+      if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return o;
+      const updated = { ...o, status: STATUS_SEQUENCE[idx + 1] };
+      changed.push({ id: updated.id, status: updated.status });
+      return updated;
+    });
+    if (!changed.length) {
+      setSelectedIds(new Set());
+      return;
+    }
+    persist(nextOrders);
     setSelectedIds(new Set());
+    // Fire & forget server sync
+    Promise.all(
+      changed.map((c) => serverPatch(c.id, { status: c.status }))
+    ).catch(() => {});
   };
 
-  const bulkDelete = () => {
+  const bulkDelete = async () => {
     if (!selectedIds.size) return;
     if (!confirm(`Delete ${selectedIds.size} selected order(s)?`)) return;
+    const ids = Array.from(selectedIds);
     persist(orders.filter((o) => !selectedIds.has(o.id)));
     setSelectedIds(new Set());
+    // Fire & forget deletes
+    Promise.all(
+      ids.map((id) => fetch(`/api/orders/${id}`, { method: "DELETE" }))
+    ).catch(() => {});
   };
 
   const toggleSelect = (id: string) => {
@@ -260,7 +281,10 @@ export default function OrdersPage() {
 
   const filtered = useMemo(() => {
     const s = deferredSearch.trim().toLowerCase();
-    if (!s) return orders.filter((o) => (statusFilter === "all" ? true : o.status === statusFilter));
+    if (!s)
+      return orders.filter((o) =>
+        statusFilter === "all" ? true : o.status === statusFilter
+      );
     return orders.filter((o) => {
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
       return (
@@ -289,7 +313,10 @@ export default function OrdersPage() {
         }
         if (idx > cursor) parts.push(text.slice(cursor, idx));
         parts.push(
-          <mark key={idx+"-hl"} className="bg-emerald-200 text-emerald-900 rounded-sm px-0.5">
+          <mark
+            key={idx + "-hl"}
+            className="bg-emerald-200 text-emerald-900 rounded-sm px-0.5"
+          >
             {text.slice(idx, idx + needle.length)}
           </mark>
         );
@@ -322,8 +349,7 @@ export default function OrdersPage() {
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Orders</h1>
             <p className="text-slate-600 mt-1 text-sm">
-              Manage racket stringing workflow. (Local only until backend
-              added.)
+              Manage racket stringing workflow.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 items-center">
@@ -372,12 +398,22 @@ export default function OrdersPage() {
           </div>
         </div>
 
-        {selectedIds.size > 0 && (
-          <Card className="border-emerald-300/50 bg-emerald-50/60">
-            <CardContent className="p-4 flex flex-wrap gap-3 items-center text-sm">
-              <span className="font-medium">{selectedIds.size} selected</span>
+        {/* Floating multi-select action bar (no layout shift) */}
+        <div
+          aria-live="polite"
+          className={`fixed left-1/2 -translate-x-1/2 top-[90px] z-40 transition-all duration-200 ease-out ${
+            selectedIds.size
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-4 pointer-events-none"
+          }`}
+        >
+          <div className="rounded-full shadow-md ring-1 ring-emerald-300/60 bg-emerald-50/90 backdrop-blur supports-[backdrop-filter]:bg-emerald-50/60 px-5 py-2 flex items-center gap-4 text-sm">
+            <span className="font-medium text-emerald-800">
+              {selectedIds.size} selected
+            </span>
+            <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={bulkAdvance}>
-                Advance Status
+                Advance
               </Button>
               <Button size="sm" variant="outline" onClick={bulkDelete}>
                 Delete
@@ -388,13 +424,13 @@ export default function OrdersPage() {
                 onClick={() => setSelectedIds(new Set())}
                 className="text-slate-500"
               >
-                Clear Selection
+                Clear
               </Button>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </div>
+        </div>
 
-  {filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <Card className="border-dashed border-2">
             <CardContent className="p-12 text-center space-y-4">
               <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
@@ -404,7 +440,7 @@ export default function OrdersPage() {
               </p>
             </CardContent>
           </Card>
-  ) : (
+        ) : (
           <Card>
             <CardContent className="p-0">
               <div className="overflow-auto">
@@ -462,7 +498,7 @@ export default function OrdersPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {highlight(o.racketBrand || "—") as any} {" "}
+                            {highlight(o.racketBrand || "—") as any}{" "}
                             {highlight(o.racketModel) as any}
                           </TableCell>
                           <TableCell>
