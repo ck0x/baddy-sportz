@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Calendar,
-  ShoppingBag,
-  Star,
-  Users,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, ClipboardList, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,37 +16,34 @@ export default function HomePage() {
             <div className="space-y-8 animate-fade-in-up">
               <div className="space-y-4">
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Master Your
+                  Track Your
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">
-                    {" "}
-                    Badminton{" "}
+                    {" "}Racket Stringing{" "}
                   </span>
-                  Game
+                  Workflow
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Professional coaching, premium equipment, and a community of
-                  passionate players. Elevate your badminton skills at Baddy
-                  Sportz.
+                  A lightweight kiosk intake form and order dashboard for badminton racket stringing. Collect orders in-store and update their status in seconds.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/lessons">
+                <Link href="/form">
                   <Button
                     size="lg"
                     className="group bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   >
-                    Book a Lesson
+                    New Order
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="/products">
+                <Link href="/orders">
                   <Button
                     variant="outline"
                     size="lg"
                     className="group border-2 border-gray-300 hover:border-emerald-600 px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105"
                   >
-                    Browse Products
-                    <ShoppingBag className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                    View Orders
+                    <ClipboardList className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                   </Button>
                 </Link>
               </div>
@@ -70,40 +60,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Feature Highlights */}
       <section className="py-16 lg:py-24 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-              Why Choose Baddy Sportz?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We're committed to helping you achieve your badminton goals with
-              expert coaching and premium equipment.
-            </p>
-          </div>
-
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: Users,
-                title: "Expert Coaching",
+                icon: ClipboardList,
+                title: "Fast Intake",
                 description:
-                  "Learn from certified professionals with years of competitive experience.",
+                  "Large-format kiosk form optimized for in-store iPad collection of customer & racket details.",
                 color: "from-emerald-500 to-emerald-600",
               },
               {
                 icon: Zap,
-                title: "Premium Equipment",
+                title: "Zero Setup",
                 description:
-                  "Access to the latest badminton gear from top brands worldwide.",
+                  "Data stored locally first. Plug in a backend later without changing the UI flow.",
                 color: "from-blue-500 to-blue-600",
               },
               {
-                icon: Star,
-                title: "Proven Results",
+                icon: CheckCircle2,
+                title: "Simple Statuses",
                 description:
-                  "Join hundreds of satisfied players who've improved their game with us.",
+                  "Move orders from Pending → In Progress → Ready → Picked Up with one click.",
                 color: "from-purple-500 to-purple-600",
               },
             ].map((feature, index) => (
@@ -130,28 +110,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Info Strip */}
       <section className="py-16 bg-gradient-to-r from-emerald-600 to-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center text-white">
-            {[
-              { number: "500+", label: "Happy Students" },
-              { number: "10+", label: "Expert Coaches" },
-              { number: "5", label: "Years Experience" },
-              { number: "1000+", label: "Products Available" },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="space-y-2 animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="text-4xl lg:text-5xl font-bold">
-                  {stat.number}
-                </div>
-                <div className="text-emerald-100 text-lg">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-6">
+          <h2 className="text-3xl font-bold">Designed for Small Pro Shops</h2>
+          <p className="text-emerald-100 text-lg max-w-3xl mx-auto">
+            Start with pure client-side storage. When you're ready, add an API route or external DB (Supabase, Firebase, Postgres) to sync orders—without redesigning the UI.
+          </p>
         </div>
       </section>
 
@@ -159,29 +124,25 @@ export default function HomePage() {
       <section className="py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-            Ready to Start Your Badminton Journey?
+            Ready to Log Your First Order?
           </h2>
-          <p className="text-xl text-gray-600">
-            Book your first lesson today and discover what makes Baddy Sportz
-            the premier badminton destination.
-          </p>
+          <p className="text-xl text-gray-600">Open the kiosk form and start tracking.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/lessons">
+            <Link href="/form">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
               >
-                <Calendar className="mr-2 h-5 w-5" />
-                Book Now
+                New Order
               </Button>
             </Link>
-            <Link href="/products">
+            <Link href="/orders">
               <Button
                 variant="outline"
                 size="lg"
                 className="border-2 border-gray-300 hover:border-emerald-600 px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105"
               >
-                View Products
+                View Orders
               </Button>
             </Link>
           </div>

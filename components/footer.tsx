@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Facebook, Instagram, Twitter, Zap } from "lucide-react"
+import { Zap } from "lucide-react"
 
 export function Footer() {
   return (
@@ -12,24 +12,28 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-lg flex items-center justify-center">
                 <Zap className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold">Baddy Sportz</span>
+              <span className="text-xl font-bold">Racket Tracker</span>
             </div>
             <p className="text-gray-400 leading-relaxed">
-              Your premier destination for badminton coaching and equipment. Elevate your game with us.
+              Simple kiosk intake form & dashboard to manage badminton racket stringing orders.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">Links</h3>
             <ul className="space-y-2">
-              {["Home", "Lessons", "Products", "About", "Contact"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "Home", href: "/" },
+                { label: "Submit Order", href: "/form" },
+                { label: "Orders", href: "/orders" },
+              ].map((l) => (
+                <li key={l.href}>
                   <Link
-                    href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    href={l.href}
                     className="text-gray-400 hover:text-emerald-400 transition-colors duration-200"
                   >
-                    {item}
+                    {l.label}
                   </Link>
                 </li>
               ))}
@@ -38,41 +42,26 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Services</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li>Private Lessons</li>
-              <li>Group Classes</li>
-              <li>Equipment Sales</li>
-              <li>Court Rental</li>
-              <li>Tournament Training</li>
+            <h3 className="text-lg font-semibold mb-4">Status Codes</h3>
+            <ul className="space-y-2 text-gray-400 text-sm">
+              <li>Pending – Submitted, not started</li>
+              <li>In Progress – Currently being strung</li>
+              <li>Ready – Completed & awaiting pickup</li>
+              <li>Picked Up – Customer collected</li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <div className="space-y-2 text-gray-400">
-              <p>123 Sports Avenue</p>
-              <p>Badminton City, BC 12345</p>
-              <p>Phone: (555) 123-4567</p>
-              <p>Email: info@baddysportz.com</p>
-            </div>
-            <div className="flex space-x-4 mt-4">
-              {[Facebook, Instagram, Twitter].map((Icon, index) => (
-                <a
-                  key={index}
-                  href="#"
-                  className="text-gray-400 hover:text-emerald-400 transition-colors duration-200 transform hover:scale-110"
-                >
-                  <Icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
+            <h3 className="text-lg font-semibold mb-4">Data</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Orders are stored locally in your browser (localStorage). Add a backend later to sync across devices.
+            </p>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Baddy Sportz. All rights reserved.</p>
+          <p>&copy; 2025 Racket Tracker. MIT Licensed.</p>
         </div>
       </div>
     </footer>

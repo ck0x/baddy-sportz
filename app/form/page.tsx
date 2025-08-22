@@ -114,8 +114,22 @@ export default function CustomerIntakeForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const newOrder = {
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      status: "pending" as const,
+      ...formData,
+    };
+    try {
+      const existing = JSON.parse(
+        localStorage.getItem("racketOrders") || "[]"
+      ) as any[];
+      existing.push(newOrder);
+      localStorage.setItem("racketOrders", JSON.stringify(existing));
+    } catch (err) {
+      console.error("Failed saving order", err);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400));
     setIsSubmitted(true);
   };
 
@@ -281,11 +295,11 @@ export default function CustomerIntakeForm() {
           <div className="bg-slate-800 text-white p-8 rounded-2xl mb-8 shadow-xl">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Zap className="h-8 w-8 text-blue-400" />
-              <h1 className="text-4xl font-bold">Badminton Pro Stringing</h1>
+              <h1 className="text-4xl font-bold">Racket Stringing Intake</h1>
               <Zap className="h-8 w-8 text-blue-400" />
             </div>
             <p className="text-xl text-slate-200 font-medium">
-              Professional racket stringing services
+              Submit your racket for stringing
             </p>
             <p className="text-lg text-slate-300 mt-2">
               Please fill out your details below

@@ -8,9 +8,9 @@ import { Footer } from "@/components/footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Baddy Sportz - Premier Badminton Coaching & Equipment",
+  title: "Racket Tracker - Stringing Order Management",
   description:
-    "Professional badminton coaching and premium equipment. Book lessons and browse our extensive product catalogue.",
+    "Track badminton racket stringing orders from intake to completion. Kiosk intake form and simple order status dashboard.",
   generator: "v0.dev",
 };
 
