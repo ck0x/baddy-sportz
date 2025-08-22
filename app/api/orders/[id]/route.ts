@@ -9,8 +9,9 @@ const patchSchema = z.object({
 
 export async function PATCH(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
+  const params = await context.params; // Await per Next.js dynamic route guidance
   const idNum = Number(params.id);
   if (Number.isNaN(idNum))
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
@@ -35,8 +36,9 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
+  const params = await context.params;
   const idNum = Number(params.id);
   if (Number.isNaN(idNum))
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
