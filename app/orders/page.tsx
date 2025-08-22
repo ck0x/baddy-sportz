@@ -327,15 +327,7 @@ export default function OrdersPage() {
             >
               <Download className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!confirm("Reset ALL orders?")) return;
-                persist([]);
-              }}
-            >
-              Clear All
-            </Button>
+            {/* Removed Clear All button to avoid accidental mass deletion */}
           </div>
         </div>
 
