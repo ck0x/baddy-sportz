@@ -19,14 +19,14 @@ export default function HomePage() {
                   Track Your
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">
                     {" "}
-                    Racket Stringing{" "}
+                    Racquet Stringing{" "}
                   </span>
                   Workflow
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
                   A lightweight kiosk intake form and order dashboard for
-                  badminton racket stringing. Collect orders in-store and update
-                  their status in seconds.
+                  badminton racquet stringing. Collect orders in-store and
+                  update their status in seconds.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">

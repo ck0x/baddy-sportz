@@ -349,7 +349,7 @@ export default function OrdersPage() {
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Orders</h1>
             <p className="text-slate-600 mt-1 text-sm">
-              Manage racket stringing workflow.
+              Manage racquet stringing workflow.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 items-center">

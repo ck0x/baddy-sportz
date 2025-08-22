@@ -9,9 +9,9 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Racket Tracker - Stringing Order Management",
+  title: "Racquet Tracker - Stringing Order Management",
   description:
-    "Track badminton racket stringing orders from intake to completion. Kiosk intake form and simple order status dashboard.",
+    "Track badminton racquet stringing orders from intake to completion. Kiosk intake form and simple order status dashboard.",
   generator: "v0.dev",
 };
 
