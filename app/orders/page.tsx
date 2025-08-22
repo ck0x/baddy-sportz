@@ -17,8 +17,6 @@ import {
   RotateCcw,
   Search,
   Trash2,
-  Table as TableIcon,
-  Rows,
   Download,
 } from "lucide-react";
 import {
@@ -76,7 +74,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  // Only table (row) view retained per request
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const storeId = Number(
@@ -324,20 +322,6 @@ export default function OrdersPage() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() =>
-                setViewMode(viewMode === "cards" ? "table" : "cards")
-              }
-              title={viewMode === "cards" ? "Table view" : "Card view"}
-            >
-              {viewMode === "cards" ? (
-                <TableIcon className="h-4 w-4" />
-              ) : (
-                <Rows className="h-4 w-4" />
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
               onClick={exportCSV}
               title="Export CSV"
             >
@@ -377,7 +361,7 @@ export default function OrdersPage() {
           </Card>
         )}
 
-        {filtered.length === 0 ? (
+  {filtered.length === 0 ? (
           <Card className="border-dashed border-2">
             <CardContent className="p-12 text-center space-y-4">
               <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
@@ -387,117 +371,7 @@ export default function OrdersPage() {
               </p>
             </CardContent>
           </Card>
-        ) : viewMode === "cards" ? (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filtered.map((o) => {
-              const idx = STATUS_SEQUENCE.indexOf(o.status);
-              const next = STATUS_SEQUENCE[idx + 1];
-              const prev = STATUS_SEQUENCE[idx - 1];
-              const selected = selectedIds.has(o.id);
-              return (
-                <Card
-                  key={o.id}
-                  className={`shadow-sm hover:shadow-md transition-shadow border-slate-200 relative ${
-                    selected ? "ring-2 ring-emerald-400" : ""
-                  }`}
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).closest("button")) return;
-                    toggleSelect(o.id);
-                  }}
-                >
-                  <div className="absolute top-2 left-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-emerald-600"
-                      checked={selected}
-                      onChange={() => toggleSelect(o.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <CardHeader className="pb-2 pt-6">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <CardTitle className="text-lg">
-                          {o.customerName}
-                        </CardTitle>
-                        <div className="text-xs text-slate-500 mt-1">
-                          {new Date(o.createdAt).toLocaleString()} •{" "}
-                          {o.serviceType}
-                        </div>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={`border px-2 py-0.5 text-xs font-medium rounded ${
-                          STATUS_COLOR[o.status]
-                        }`}
-                      >
-                        {STATUS_LABEL[o.status]}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                      <div className="text-slate-500">Racket</div>
-                      <div className="font-medium">
-                        {o.racketBrand || "—"} {o.racketModel}
-                      </div>
-                      <div className="text-slate-500">String</div>
-                      <div>
-                        {o.stringType || (
-                          <span className="text-slate-400">(n/a)</span>
-                        )}
-                      </div>
-                      <div className="text-slate-500">Contact</div>
-                      <div>{o.contactNumber}</div>
-                      {o.email && (
-                        <>
-                          <div className="text-slate-500">Email</div>
-                          <div className="truncate">{o.email}</div>
-                        </>
-                      )}
-                    </div>
-                    {o.additionalNotes && (
-                      <div className="pt-2 border-t text-slate-600 text-xs leading-relaxed">
-                        {o.additionalNotes}
-                      </div>
-                    )}
-                    <div className="flex gap-2 pt-2">
-                      {prev && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => revertStatus(o.id)}
-                          title="Revert"
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {next && (
-                        <Button
-                          size="sm"
-                          onClick={() => advanceStatus(o.id)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1"
-                        >
-                          {STATUS_LABEL[next]}
-                        </Button>
-                      )}
-                      {!next && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deleteOrder(o.id)}
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        ) : (
+  ) : (
           <Card>
             <CardContent className="p-0">
               <div className="overflow-auto">
