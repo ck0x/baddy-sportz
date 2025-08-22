@@ -89,6 +89,86 @@
   padding-right: 0.5rem;
 }
 
+/* Adaptive form layout for kiosk orientations */
+.kiosk .racket-intake-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Landscape: arrange major sections in two columns for faster side-by-side input */
+.kiosk.ipad-landscape .racket-intake-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
+  row-gap: 2rem;
+}
+.kiosk.ipad-landscape .racket-intake-form .customer-section,
+.kiosk.ipad-landscape .racket-intake-form .racket-section,
+.kiosk.ipad-landscape .racket-intake-form .service-section,
+.kiosk.ipad-landscape .racket-intake-form .notes-section,
+.kiosk.ipad-landscape .racket-intake-form .submit-section {
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.8); /* slate-200 */
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Span adjustments: make customer + racket top row, service + notes second, submit full width */
+.kiosk.ipad-landscape .racket-intake-form .customer-section {
+  grid-column: 1;
+}
+.kiosk.ipad-landscape .racket-intake-form .racket-section {
+  grid-column: 2;
+}
+.kiosk.ipad-landscape .racket-intake-form .service-section {
+  grid-column: 1;
+}
+.kiosk.ipad-landscape .racket-intake-form .notes-section {
+  grid-column: 2;
+}
+.kiosk.ipad-landscape .racket-intake-form .submit-section {
+  grid-column: 1 / span 2;
+}
+
+/* Portrait: keep single column but tighten spacing slightly */
+.kiosk.ipad-portrait .racket-intake-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.kiosk.ipad-portrait .racket-intake-form .section {
+  background: #ffffff;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Transition for smooth orientation swap */
+.kiosk .racket-intake-form .section {
+  transition: all 0.35s ease;
+}
+
+/* Non-kiosk orientation helpers */
+body.o-landscape .racket-intake-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+body.o-landscape .racket-intake-form .service-section,
+body.o-landscape .racket-intake-form .notes-section {
+  grid-column: span 1;
+}
+body.o-landscape .racket-intake-form .submit-section {
+  grid-column: 1 / -1;
+}
+body.o-portrait .racket-intake-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
 @layer utilities {
   .animate-fade-in-up {
     animation: fadeInUp 0.6s ease-out forwards;

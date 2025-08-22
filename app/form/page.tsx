@@ -19,18 +19,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   CheckCircle,
   User,
   Phone,
   Mail,
   Zap,
-  Settings,
   FileText,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 
 interface FormData {
@@ -45,7 +41,9 @@ interface FormData {
 }
 
 export default function CustomerIntakeForm() {
-  type Orientation = "landscape" | "portrait";
+  // fullscreen / kiosk state
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isKiosk, setIsKiosk] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     customerName: "",
     contactNumber: "",
@@ -58,46 +56,36 @@ export default function CustomerIntakeForm() {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
-  const [kiosk, setKiosk] = useState<boolean>(false);
-  const [orientation, setOrientation] = useState<Orientation>("landscape");
-
-  // Apply classes and fullscreen based on kiosk + orientation selectors
+  // fullscreen listener keeps local state in sync
   useEffect(() => {
-    const body = document.body;
-    body.classList.remove("kiosk", "ipad-landscape", "ipad-portrait");
+    const handler = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
-    const enableFullscreen = async () => {
-      try {
-        if (!document.fullscreenElement) {
-          await document.documentElement.requestFullscreen?.();
-        }
-      } catch {}
+  // Apply / remove kiosk classes
+  useEffect(() => {
+    const apply = () => {
+      const body = document.body;
+      body.classList.remove("kiosk", "ipad-landscape", "ipad-portrait");
+      if (!isKiosk) return;
+      body.classList.add("kiosk");
+      const portrait = window.matchMedia("(orientation: portrait)").matches;
+      body.classList.add(portrait ? "ipad-portrait" : "ipad-landscape");
     };
+    apply();
+    const orientationHandler = () => apply();
+    window.addEventListener("orientationchange", orientationHandler);
+    return () =>
+      window.removeEventListener("orientationchange", orientationHandler);
+  }, [isKiosk]);
 
-    const disableFullscreen = async () => {
-      try {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen?.();
-        }
-      } catch {}
-    };
-
-    if (!kiosk) {
-      disableFullscreen();
-      return;
-    }
-
-    body.classList.add("kiosk");
-    body.classList.add(
-      orientation === "landscape" ? "ipad-landscape" : "ipad-portrait"
-    );
-    enableFullscreen();
-  }, [kiosk, orientation]);
-
-  // Cleanup on unmount so kiosk styles don't persist across navigation
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       document.body.classList.remove(
+        "o-portrait",
+        "o-landscape",
         "kiosk",
         "ipad-landscape",
         "ipad-portrait"
@@ -109,6 +97,43 @@ export default function CustomerIntakeForm() {
       } catch {}
     };
   }, []);
+
+  // Add responsive orientation classes to body (automatic)
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: portrait)");
+    const apply = () => {
+      document.body.classList.toggle("o-portrait", mq.matches);
+      document.body.classList.toggle("o-landscape", !mq.matches);
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const toggleKiosk = async () => {
+    if (!isKiosk) {
+      // entering kiosk
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen?.();
+        }
+        setIsKiosk(true);
+      } catch (e) {
+        console.error("Enter kiosk failed", e);
+      }
+    } else {
+      // exiting kiosk
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen?.();
+        }
+      } catch (e) {
+        console.error("Exit kiosk failed", e);
+      } finally {
+        setIsKiosk(false);
+      }
+    }
+  };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -235,88 +260,30 @@ export default function CustomerIntakeForm() {
             </CardContent>
           </Card>
         </div>
-        <div className="absolute top-2 -right-12 z-10">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full shadow-sm"
-                aria-label="Screen Options"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72" side="left" align="start">
-              <div className="space-y-3">
-                <div>
-                  <div className="text-xs font-medium text-slate-600 mb-1">
-                    Kiosk Mode
-                  </div>
-                  <Select
-                    value={kiosk ? "on" : "off"}
-                    onValueChange={(v) => setKiosk(v === "on")}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Off" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="off">Off</SelectItem>
-                      <SelectItem value="on">On</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-slate-600 mb-1">
-                    Orientation
-                  </div>
-                  <Select
-                    value={orientation}
-                    onValueChange={(v: Orientation) => setOrientation(v)}
-                  >
-                    <SelectTrigger className="h-9" disabled={!kiosk}>
-                      <SelectValue placeholder="Horizontal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="landscape">Horizontal</SelectItem>
-                      <SelectItem value="portrait">Vertical</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="bg-slate-800 text-white p-8 rounded-2xl mb-8 shadow-xl">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Zap className="h-8 w-8 text-blue-400" />
-              <h1 className="text-4xl font-bold">Racket Stringing Intake</h1>
-              <Zap className="h-8 w-8 text-blue-400" />
-            </div>
-            <p className="text-xl text-slate-200 font-medium">
-              Submit your racket for stringing
-            </p>
-            <p className="text-lg text-slate-300 mt-2">
-              Please fill out your details below
-            </p>
-          </div>
-        </div>
-
-        {/* Form */}
-        <Card className="shadow-xl border border-slate-200 bg-white">
+        {/* Main Form Content */}
+        {/* External kiosk toggle positioned beside (outside) the form header */}
+        <button
+          type="button"
+          onClick={toggleKiosk}
+          className="absolute top-8 -right-14 md:-right-16 z-20 inline-flex items-center justify-center w-11 h-11 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 shadow transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+          aria-label={isKiosk ? "Exit kiosk mode" : "Enter kiosk mode"}
+        >
+          {isKiosk ? (
+            <Minimize2 className="h-5 w-5" />
+          ) : (
+            <Maximize2 className="h-5 w-5" />
+          )}
+        </button>
+        <Card className="shadow-xl border border-slate-200 bg-white mt-8">
           <CardHeader className="bg-slate-50 rounded-t-lg border-b border-slate-200">
             <CardTitle className="text-2xl flex items-center gap-3 text-slate-800">
-              <FileText className="h-6 w-6 text-blue-600" />
-              Customer & Racket Information
+              <FileText className="h-6 w-6 text-blue-600" /> Customer & Racket
+              Information
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Customer Information */}
-              <div className="space-y-6">
+              <div className="space-y-6 section customer-section">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <User className="h-5 w-5 text-blue-600" />
@@ -325,15 +292,13 @@ export default function CustomerIntakeForm() {
                     Customer Details
                   </h3>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <Label
                       htmlFor="customerName"
                       className="text-base font-medium flex items-center gap-2 text-slate-700"
                     >
-                      <User className="h-4 w-4 text-blue-600" />
-                      Full Name *
+                      <User className="h-4 w-4 text-blue-600" /> Full Name *
                     </Label>
                     <Input
                       id="customerName"
@@ -346,14 +311,13 @@ export default function CustomerIntakeForm() {
                       className="text-lg p-4 h-14 border-2 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 rounded-lg"
                     />
                   </div>
-
                   <div className="space-y-3">
                     <Label
                       htmlFor="contactNumber"
                       className="text-base font-medium flex items-center gap-2 text-slate-700"
                     >
-                      <Phone className="h-4 w-4 text-blue-600" />
-                      Contact Number *
+                      <Phone className="h-4 w-4 text-blue-600" /> Contact Number
+                      *
                     </Label>
                     <Input
                       id="contactNumber"
@@ -367,14 +331,12 @@ export default function CustomerIntakeForm() {
                     />
                   </div>
                 </div>
-
                 <div className="space-y-3">
                   <Label
                     htmlFor="email"
                     className="text-base font-medium flex items-center gap-2 text-slate-700"
                   >
-                    <Mail className="h-4 w-4 text-slate-500" />
-                    Email Address
+                    <Mail className="h-4 w-4 text-slate-500" /> Email Address
                   </Label>
                   <Input
                     id="email"
@@ -386,9 +348,7 @@ export default function CustomerIntakeForm() {
                   />
                 </div>
               </div>
-
-              {/* Racket Information */}
-              <div className="space-y-6">
+              <div className="space-y-6 section racket-section">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <Zap className="h-5 w-5 text-blue-600" />
@@ -397,7 +357,6 @@ export default function CustomerIntakeForm() {
                     Racket Details
                   </h3>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <Label
@@ -408,9 +367,7 @@ export default function CustomerIntakeForm() {
                     </Label>
                     <Select
                       value={formData.racketBrand}
-                      onValueChange={(value) =>
-                        handleInputChange("racketBrand", value)
-                      }
+                      onValueChange={(v) => handleInputChange("racketBrand", v)}
                     >
                       <SelectTrigger className="text-lg h-14 border-2 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg">
                         <SelectValue placeholder="Select brand" />
@@ -425,7 +382,6 @@ export default function CustomerIntakeForm() {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="space-y-3">
                     <Label
                       htmlFor="racketModel"
@@ -445,7 +401,6 @@ export default function CustomerIntakeForm() {
                     />
                   </div>
                 </div>
-
                 <div className="space-y-3">
                   <Label
                     htmlFor="stringType"
@@ -455,9 +410,7 @@ export default function CustomerIntakeForm() {
                   </Label>
                   <Select
                     value={formData.stringType}
-                    onValueChange={(value) =>
-                      handleInputChange("stringType", value)
-                    }
+                    onValueChange={(v) => handleInputChange("stringType", v)}
                   >
                     <SelectTrigger className="text-lg h-14 border-2 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg">
                       <SelectValue placeholder="Select string type (optional)" />
@@ -475,23 +428,18 @@ export default function CustomerIntakeForm() {
                   </Select>
                 </div>
               </div>
-
-              {/* Service Options */}
-              <div className="space-y-6">
+              <div className="space-y-6 section service-section">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <Settings className="h-5 w-5 text-blue-600" />
+                    <Zap className="h-5 w-5 text-blue-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800">
                     Service Type
                   </h3>
                 </div>
-
                 <RadioGroup
                   value={formData.serviceType}
-                  onValueChange={(value) =>
-                    handleInputChange("serviceType", value)
-                  }
+                  onValueChange={(v) => handleInputChange("serviceType", v)}
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
                   <Label
@@ -512,7 +460,6 @@ export default function CustomerIntakeForm() {
                       </p>
                     </div>
                   </Label>
-
                   <Label
                     htmlFor="premium"
                     className="flex items-center space-x-4 p-6 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
@@ -533,15 +480,13 @@ export default function CustomerIntakeForm() {
                   </Label>
                 </RadioGroup>
               </div>
-
-              {/* Additional Notes */}
-              <div className="space-y-3">
+              <div className="space-y-3 section notes-section">
                 <Label
                   htmlFor="additionalNotes"
                   className="text-base font-medium flex items-center gap-2 text-slate-700"
                 >
-                  <FileText className="h-4 w-4 text-blue-600" />
-                  Additional Notes
+                  <FileText className="h-4 w-4 text-blue-600" /> Additional
+                  Notes
                 </Label>
                 <Textarea
                   id="additionalNotes"
@@ -553,20 +498,20 @@ export default function CustomerIntakeForm() {
                   className="text-lg p-4 min-h-[120px] border-2 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 rounded-lg resize-none"
                 />
               </div>
-
-              {/* Submit Button */}
-              {errorMsg && (
-                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
-                  {errorMsg}
-                </div>
-              )}
-              <Button
-                type="submit"
-                disabled={submitting}
-                className="w-full text-xl py-8 h-16 font-bold bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors duration-200 shadow-lg hover:shadow-xl text-white rounded-lg"
-              >
-                {submitting ? "Submitting..." : "Submit Order"}
-              </Button>
+              <div className="section submit-section space-y-4">
+                {errorMsg && (
+                  <div className="error-message text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+                    {errorMsg}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full text-xl py-8 h-16 font-bold bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors duration-200 shadow-lg hover:shadow-xl text-white rounded-lg"
+                >
+                  {submitting ? "Submitting..." : "Submit Order"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
