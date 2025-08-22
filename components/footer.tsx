@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { Zap } from "lucide-react"
+import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export function Footer() {
   return (
@@ -15,7 +15,8 @@ export function Footer() {
               <span className="text-xl font-bold">Racket Tracker</span>
             </div>
             <p className="text-gray-400 leading-relaxed">
-              Simple kiosk intake form & dashboard to manage badminton racket stringing orders.
+              Simple kiosk intake form & dashboard to manage badminton racket
+              stringing orders.
             </p>
           </div>
 
@@ -55,7 +56,8 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Data</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Orders are stored locally in your browser (localStorage). Add a backend later to sync across devices.
+              Orders are stored locally in your browser (localStorage). Add a
+              backend later to sync across devices.
             </p>
           </div>
         </div>
@@ -65,5 +67,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -18,12 +18,15 @@ export default function HomePage() {
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Track Your
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">
-                    {" "}Racket Stringing{" "}
+                    {" "}
+                    Racket Stringing{" "}
                   </span>
                   Workflow
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  A lightweight kiosk intake form and order dashboard for badminton racket stringing. Collect orders in-store and update their status in seconds.
+                  A lightweight kiosk intake form and order dashboard for
+                  badminton racket stringing. Collect orders in-store and update
+                  their status in seconds.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -115,7 +118,9 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white space-y-6">
           <h2 className="text-3xl font-bold">Designed for Small Pro Shops</h2>
           <p className="text-emerald-100 text-lg max-w-3xl mx-auto">
-            Start with pure client-side storage. When you're ready, add an API route or external DB (Supabase, Firebase, Postgres) to sync orders—without redesigning the UI.
+            Start with pure client-side storage. When you're ready, add an API
+            route or external DB (Supabase, Firebase, Postgres) to sync
+            orders—without redesigning the UI.
           </p>
         </div>
       </section>
@@ -126,7 +131,9 @@ export default function HomePage() {
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
             Ready to Log Your First Order?
           </h2>
-          <p className="text-xl text-gray-600">Open the kiosk form and start tracking.</p>
+          <p className="text-xl text-gray-600">
+            Open the kiosk form and start tracking.
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/form">
               <Button

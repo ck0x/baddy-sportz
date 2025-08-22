@@ -26,7 +26,9 @@ export function Navigation() {
             <div className="w-8 h-8 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Racket Tracker</span>
+            <span className="text-xl font-bold text-gray-900">
+              Racket Tracker
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
