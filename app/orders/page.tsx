@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useDeferredValue } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -74,6 +74,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   // Only table (row) view retained per request
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -258,17 +259,46 @@ export default function OrdersPage() {
   };
 
   const filtered = useMemo(() => {
+    const s = deferredSearch.trim().toLowerCase();
+    if (!s) return orders.filter((o) => (statusFilter === "all" ? true : o.status === statusFilter));
     return orders.filter((o) => {
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
-      if (!search) return true;
-      const s = search.toLowerCase();
       return (
         o.customerName.toLowerCase().includes(s) ||
         o.racketModel.toLowerCase().includes(s) ||
         o.racketBrand.toLowerCase().includes(s)
       );
     });
-  }, [orders, statusFilter, search]);
+  }, [orders, statusFilter, deferredSearch]);
+
+  const highlight = useCallback(
+    (text: string) => {
+      const q = deferredSearch.trim();
+      if (!q) return text;
+      const lower = text.toLowerCase();
+      const needle = q.toLowerCase();
+      const first = lower.indexOf(needle);
+      if (first === -1) return text;
+      const parts: React.ReactNode[] = [];
+      let cursor = 0;
+      while (cursor < text.length) {
+        const idx = lower.indexOf(needle, cursor);
+        if (idx === -1) {
+          parts.push(text.slice(cursor));
+          break;
+        }
+        if (idx > cursor) parts.push(text.slice(cursor, idx));
+        parts.push(
+          <mark key={idx+"-hl"} className="bg-emerald-200 text-emerald-900 rounded-sm px-0.5">
+            {text.slice(idx, idx + needle.length)}
+          </mark>
+        );
+        cursor = idx + needle.length;
+      }
+      return <>{parts}</>;
+    },
+    [deferredSearch]
+  );
 
   const allVisibleSelected =
     filtered.length > 0 && filtered.every((o) => selectedIds.has(o.id));
@@ -297,14 +327,25 @@ export default function OrdersPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative">
+            <div className="relative group">
               <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search name / model"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-56"
+                className="pl-9 pr-7 w-56"
+                aria-label="Search orders"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
@@ -408,7 +449,7 @@ export default function OrdersPage() {
                             />
                           </TableCell>
                           <TableCell className="font-medium">
-                            {o.customerName}
+                            {highlight(o.customerName) as any}
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -421,7 +462,8 @@ export default function OrdersPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {o.racketBrand || "—"} {o.racketModel}
+                            {highlight(o.racketBrand || "—") as any} {" "}
+                            {highlight(o.racketModel) as any}
                           </TableCell>
                           <TableCell>
                             {o.stringType || (
