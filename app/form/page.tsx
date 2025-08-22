@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,7 +57,7 @@ export default function CustomerIntakeForm() {
     additionalNotes: "",
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [kiosk, setKiosk] = useState<boolean>(false);
   const [orientation, setOrientation] = useState<Orientation>("landscape");
 
@@ -116,6 +117,24 @@ export default function CustomerIntakeForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const { toast } = useToast();
+
+  const triggerSuccessCycle = (variant: "remote" | "local") => {
+    setShowSuccess(true);
+    toast({
+      title: variant === "remote" ? "Order submitted" : "Saved locally",
+      description:
+        variant === "remote"
+          ? "We'll take great care of your racket."
+          : "Network issue – stored locally and visible in Orders page.",
+    });
+    // Fade out + reset after delay
+    setTimeout(() => {
+      setShowSuccess(false);
+      resetForm();
+    }, 2400);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -144,10 +163,16 @@ export default function CustomerIntakeForm() {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || `Failed (${res.status})`);
       }
-      setIsSubmitted(true);
+      triggerSuccessCycle("remote");
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Failed to submit. Saving locally.");
+      const msg = err.message || "Failed to submit. Saving locally.";
+      setErrorMsg(msg);
+      toast({
+        title: "Submission error",
+        description: msg,
+        variant: "destructive",
+      });
       // Fallback local save
       try {
         const newOrder = {
@@ -161,7 +186,7 @@ export default function CustomerIntakeForm() {
         ) as any[];
         existing.push(newOrder);
         localStorage.setItem("racketOrders", JSON.stringify(existing));
-        setIsSubmitted(true);
+        triggerSuccessCycle("local");
       } catch {}
     } finally {
       setSubmitting(false);
@@ -179,99 +204,37 @@ export default function CustomerIntakeForm() {
       serviceType: "standard",
       additionalNotes: "",
     });
-    setIsSubmitted(false);
   };
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-6">
-        <div className="max-w-4xl mx-auto relative">
-          <div className="absolute top-2 -right-12 z-10">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full shadow-sm"
-                  aria-label="Screen Options"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-72" side="left" align="start">
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-xs font-medium text-slate-600 mb-1">
-                      Kiosk Mode
-                    </div>
-                    <Select
-                      value={kiosk ? "on" : "off"}
-                      onValueChange={(v) => setKiosk(v === "on")}
-                    >
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Off" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="off">Off</SelectItem>
-                        <SelectItem value="on">On</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-slate-600 mb-1">
-                      Orientation
-                    </div>
-                    <Select
-                      value={orientation}
-                      onValueChange={(v: Orientation) => setOrientation(v)}
-                    >
-                      <SelectTrigger className="h-9" disabled={!kiosk}>
-                        <SelectValue placeholder="Horizontal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="landscape">Horizontal</SelectItem>
-                        <SelectItem value="portrait">Vertical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="w-full flex items-center justify-center">
-            <Card className="w-full max-w-md text-center shadow-xl border-0 bg-white">
-              <CardContent className="pt-12 pb-8">
-                <div className="flex justify-center mb-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
-                    <CheckCircle className="h-20 w-20 text-blue-600 relative z-10" />
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-3">
-                  Thank You!
-                </h2>
-                <p className="text-slate-600 mb-8 text-lg leading-relaxed">
-                  Your order has been submitted successfully. We'll take great
-                  care of your racket!
-                </p>
-                <Button
-                  onClick={resetForm}
-                  className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-lg text-white"
-                >
-                  Submit Another Order
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
       <div className="max-w-4xl mx-auto relative">
+        {/* Success Overlay */}
+        <div
+          className={`absolute inset-0 z-30 flex items-center justify-center transition-opacity duration-500 ${
+            showSuccess ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <Card className="w-full max-w-md text-center shadow-2xl border-0 bg-white/90 backdrop-blur">
+            <CardContent className="pt-12 pb-10">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping" />
+                  <CheckCircle className="h-20 w-20 text-blue-600 relative z-10" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-slate-800 mb-3">
+                Thank You!
+              </h2>
+              <p className="text-slate-600 mb-2 text-lg leading-relaxed">
+                Your order has been recorded.
+              </p>
+              <p className="text-slate-500 text-sm">
+                Ready for next submission…
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         <div className="absolute top-2 -right-12 z-10">
           <Popover>
             <PopoverTrigger asChild>
