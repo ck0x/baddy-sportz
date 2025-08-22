@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -79,55 +79,97 @@ export default function OrdersPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Load orders from localStorage
-  useEffect(() => {
+  const storeId = Number(
+    process.env.NEXT_PUBLIC_DEFAULT_STORE_ID || process.env.STORE_ID || 1
+  );
+
+  const loadOrders = useCallback(async () => {
     try {
-      const raw = localStorage.getItem("racketOrders");
-      if (raw) {
-        const parsed = JSON.parse(raw) as OrderRecord[];
-        setOrders(
-          parsed.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-        );
-      }
-    } catch (e) {
-      console.error("Failed to parse orders", e);
+      const res = await fetch(`/api/orders?storeId=${storeId}`);
+      if (!res.ok) throw new Error("api fetch failed");
+      const json = await res.json();
+      const apiOrders = (json.data || []).map((j: any) => ({
+        id: String(j.id),
+        createdAt: j.created_at,
+        status: (j.status === "in_progress"
+          ? "in-progress"
+          : j.status) as OrderStatus,
+        customerName: j.customer_name,
+        contactNumber: j.contact_number,
+        email: j.email,
+        racketBrand: j.racket_brand,
+        racketModel: j.racket_model,
+        stringType: j.string_type,
+        serviceType: j.service_type?.toLowerCase() || "standard",
+        additionalNotes: j.additional_notes || "",
+      })) as OrderRecord[];
+      setOrders(apiOrders);
+      // sync to localStorage for offline fallback
+      try {
+        localStorage.setItem("racketOrders", JSON.stringify(apiOrders));
+      } catch {}
+    } catch (err) {
+      console.warn("Using localStorage fallback", err);
+      try {
+        const raw = localStorage.getItem("racketOrders");
+        if (raw) setOrders(JSON.parse(raw));
+      } catch {}
     }
-  }, []);
+  }, [storeId]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const persist = (next: OrderRecord[]) => {
     setOrders(next);
     try {
       localStorage.setItem("racketOrders", JSON.stringify(next));
-    } catch (e) {
-      console.error("Persist failed", e);
-    }
+    } catch {}
+  };
+
+  const serverPatch = async (id: string, payload: any) => {
+    try {
+      await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {}
   };
 
   const advanceStatus = (id: string) => {
-    persist(
-      orders.map((o) => {
-        if (o.id !== id) return o;
-        const idx = STATUS_SEQUENCE.indexOf(o.status);
-        if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return o;
-        return { ...o, status: STATUS_SEQUENCE[idx + 1] };
-      })
-    );
+    let changed: OrderRecord | undefined;
+    const nextOrders = orders.map((o) => {
+      if (o.id !== id) return o;
+      const idx = STATUS_SEQUENCE.indexOf(o.status);
+      if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return o;
+      changed = { ...o, status: STATUS_SEQUENCE[idx + 1] };
+      return changed;
+    });
+    persist(nextOrders);
+    if (changed) serverPatch(changed.id, { status: changed.status });
   };
 
   const revertStatus = (id: string) => {
-    persist(
-      orders.map((o) => {
-        if (o.id !== id) return o;
-        const idx = STATUS_SEQUENCE.indexOf(o.status);
-        if (idx <= 0) return o;
-        return { ...o, status: STATUS_SEQUENCE[idx - 1] };
-      })
-    );
+    let changed: OrderRecord | undefined;
+    const nextOrders = orders.map((o) => {
+      if (o.id !== id) return o;
+      const idx = STATUS_SEQUENCE.indexOf(o.status);
+      if (idx <= 0) return o;
+      changed = { ...o, status: STATUS_SEQUENCE[idx - 1] };
+      return changed;
+    });
+    persist(nextOrders);
+    if (changed) serverPatch(changed.id, { status: changed.status });
   };
 
   const deleteOrder = (id: string) => {
     if (!confirm("Delete this order?")) return;
     persist(orders.filter((o) => o.id !== id));
+    try {
+      fetch(`/api/orders/${id}`, { method: "DELETE" });
+    } catch {}
   };
 
   const bulkAdvance = () => {

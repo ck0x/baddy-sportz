@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
+import { supabaseClient } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -112,25 +113,59 @@ export default function CustomerIntakeForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newOrder = {
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      status: "pending" as const,
-      ...formData,
-    };
+    setSubmitting(true);
+    setErrorMsg(null);
+    const storeId = Number(
+      process.env.NEXT_PUBLIC_DEFAULT_STORE_ID || process.env.STORE_ID || 1
+    );
     try {
-      const existing = JSON.parse(
-        localStorage.getItem("racketOrders") || "[]"
-      ) as any[];
-      existing.push(newOrder);
-      localStorage.setItem("racketOrders", JSON.stringify(existing));
-    } catch (err) {
-      console.error("Failed saving order", err);
+      const payload = {
+        storeId,
+        customerName: formData.customerName.trim(),
+        contactNumber: formData.contactNumber.trim(),
+        email: formData.email.trim() || undefined,
+        racketBrand: formData.racketBrand.trim(),
+        racketModel: formData.racketModel.trim(),
+        stringType: formData.stringType || undefined,
+        serviceType: formData.serviceType,
+        additionalNotes: formData.additionalNotes || undefined,
+      };
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || `Failed (${res.status})`);
+      }
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to submit. Saving locally.");
+      // Fallback local save
+      try {
+        const newOrder = {
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          status: "pending",
+          ...formData,
+        };
+        const existing = JSON.parse(
+          localStorage.getItem("racketOrders") || "[]"
+        ) as any[];
+        existing.push(newOrder);
+        localStorage.setItem("racketOrders", JSON.stringify(existing));
+        setIsSubmitted(true);
+      } catch {}
+    } finally {
+      setSubmitting(false);
     }
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    setIsSubmitted(true);
   };
 
   const resetForm = () => {
@@ -557,11 +592,17 @@ export default function CustomerIntakeForm() {
               </div>
 
               {/* Submit Button */}
+              {errorMsg && (
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+                  {errorMsg}
+                </div>
+              )}
               <Button
                 type="submit"
-                className="w-full text-xl py-8 h-16 font-bold bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl text-white rounded-lg"
+                disabled={submitting}
+                className="w-full text-xl py-8 h-16 font-bold bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors duration-200 shadow-lg hover:shadow-xl text-white rounded-lg"
               >
-                Submit Order
+                {submitting ? "Submitting..." : "Submit Order"}
               </Button>
             </form>
           </CardContent>
